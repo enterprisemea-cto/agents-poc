@@ -1,0 +1,6 @@
+{
+  "name": "agents-poc",
+  "version": "0.1.0",
+  "description": "Teach yourself to build per-project agents with memory, routing, and reviewer chaining.",
+  "author": { "name": "Mario" }
+}
