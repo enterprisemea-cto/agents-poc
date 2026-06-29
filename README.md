@@ -8,8 +8,10 @@ A Claude Code plugin that teaches **per-project agents, persistent memory, and t
 
 This plugin gives Claude Code two slash commands:
 
-- `/build-team` — interviews you about your project, then generates per-role agent files, a routing table (`team.md`), and a patch for `CLAUDE.md`.
-- `/dispatch "<task>"` — reads that routing table and delegates the task to the right agent, then chains a reviewer if one is paired.
+- `/agents-poc:build-team` — interviews you about your project, then generates per-role agent files, a routing table (`team.md`), and a patch for `CLAUDE.md`.
+- `/agents-poc:dispatch "<task>"` — reads that routing table and delegates the task to the right agent, then chains a reviewer if one is paired.
+
+You can also invoke each skill by describing what you want in plain language — skills are description-matched, not just slash-command-matched.
 
 The generated files are the lesson. You can read them to understand how Claude Code agents work, edit them to customise behaviour, and run the skills again to add more roles.
 
@@ -17,35 +19,45 @@ The generated files are the lesson. You can read them to understand how Claude C
 
 ## Install
 
-This plugin is a local directory containing `.claude-plugin/plugin.json`. To add it to Claude Code:
-
 1. Clone or copy this repository to your machine.
-2. In Claude Code, open your plugin settings and add it as a **local plugin directory**, pointing at the root of this repository.
-3. Restart Claude Code. The `/build-team` and `/dispatch` commands will appear.
+2. Add the marketplace (local path):
+   ```
+   /plugin marketplace add /path/to/agents-poc
+   ```
+   Or by git URL:
+   ```
+   /plugin marketplace add https://github.com/you/agents-poc
+   ```
+3. Install the plugin:
+   ```
+   /plugin install agents-poc@agents-poc
+   ```
+   Format: `<plugin-name>@<marketplace-name>`.
+4. For local development you can also launch directly: `claude --plugin-dir /path/to/agents-poc`.
 
 ---
 
 ## Quickstart (happy path)
 
 ```
-/build-team
+/agents-poc:build-team
 ```
 
 Claude interviews you, proposes a roster (2–4 roles), asks a few targeted questions, then writes:
 
 - `.claude/agents/<role>.md` — one file per role
 - `.claude/team.md` — routing table and review pairings
-- A `## Team` section appended to your `CLAUDE.md`
+- A `## Team` section added to your `CLAUDE.md` after you confirm
 
 **Then run `/clear`.**
 
-> `/clear` is required. Agent files written during a session are not registered in Claude Code's agent registry until you clear and restart. Skipping this step means `/dispatch` will fail with "agent not found".
+> `/clear` is required. Agent files written during a session are not registered in Claude Code's agent registry until you clear and restart. Skipping this step means `/agents-poc:dispatch` will fail with "agent not found".
 
 ```
-/dispatch "implement the widget creation endpoint"
+/agents-poc:dispatch "implement the widget creation endpoint"
 ```
 
-`/dispatch` reads `team.md`, scores the task against the routing notes, picks the best-matched role, delegates via `Task(subagent_type=...)`, and — if a reviewer is paired — chains that reviewer automatically once the implementation completes.
+`/agents-poc:dispatch` reads `team.md`, scores the task against the routing notes, picks the best-matched role, delegates via `Task(subagent_type=...)` (Claude Code's Agent/Task mechanism — dispatch hands the work to the named agent as a sub-task), and — if a reviewer is paired — chains that reviewer automatically once the implementation completes.
 
 ---
 
@@ -106,7 +118,7 @@ command: "bash -c 'test -s \"$CLAUDE_PROJECT_DIR/.claude/agent-memory/builder/ME
 - **`$CLAUDE_PROJECT_DIR`** — Claude Code sets this to the project root at runtime. The hook uses it to find the memory file regardless of what directory the agent is working in.
 - **`test -s`** — tests that the file exists AND is non-empty (`-s` = size > 0). An empty file still fails the test, so the agent cannot satisfy the hook by writing a blank file.
 - **`exit 2`** — exit code 2 signals Claude Code to block the session from ending and surface the message to the agent. The agent sees the stderr message and knows to write the memory entry.
-- **Nudge, not a wall** — Claude Code respects the environment variable `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` (defaults to 8). After that many blocks, the hook is bypassed and the session closes. This prevents an infinite loop if the agent ignores the nudge.
+- **Nudge, not a wall** — Claude Code's stop-hook loop protection (the `stop_hook_active` flag is set when a stop hook is already in progress) prevents an infinite block. The hook is a strong nudge, not an unbreakable wall.
 
 ### `## On start — load memory`
 
@@ -153,4 +165,4 @@ Each agent owns its own file. The file is never written by `/build-team` — onl
 
 **Hand-write an agent** — create `.claude/agents/my-role.md` with the same frontmatter structure. The minimum viable file is a `name:`, `model:`, and a `## Role` block.
 
-**Add more roles** — run `/build-team` again. It detects existing agent files and asks before overwriting (`overwrite / version-suffix / skip`).
+**Add more roles** — run `/agents-poc:build-team` again. It detects existing agent files and asks before overwriting (`overwrite / version-suffix / skip`).

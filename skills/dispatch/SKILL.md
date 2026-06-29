@@ -7,7 +7,7 @@ description: Route a task to the team / dispatch work to an agent / hand this to
 
 Walk up from the current working directory, checking for `.claude/team.md` at each level until reaching the filesystem root. Read the first one found in full — you need all four sections (`## Roster`, `## Priority order`, `## Routing notes`, `## Review pairings`).
 
-If no `.claude/team.md` is found anywhere in the path: tell the user "No team.md found — run `/build-team` first to define your agent team", then STOP. Do not proceed and do not attempt the task inline.
+If no `.claude/team.md` is found anywhere in the path: tell the user "No team.md found — run `/agents-poc:build-team` first to define your agent team", then STOP. Do not proceed and do not attempt the task inline.
 
 ## 2. Match task to role
 
@@ -15,7 +15,7 @@ Read `## Routing notes` and score the incoming task against it. Routing notes ma
 
 Pick the highest-scoring role. If two or more roles tie, use `## Priority order` to break the tie: the role listed earlier wins.
 
-If the task is genuinely tied with no signal from `## Priority order` — meaning both roles appear at equal priority — ask the user to clarify which role should handle it rather than guessing.
+If two or more tied roles are all absent from `## Priority order`, ask the user to clarify which role should handle it rather than guessing.
 
 If the task clearly spans two genuinely distinct competencies (for example: implement a feature AND write its documentation, or backend logic AND frontend rendering), split it into sequential dispatches — one per role, in logical order.
 

@@ -1,0 +1,11 @@
+{
+  "name": "agents-poc",
+  "owner": { "name": "Mario" },
+  "plugins": [
+    {
+      "name": "agents-poc",
+      "source": "./",
+      "description": "Teach yourself to build per-project agents with memory, routing, and reviewer chaining."
+    }
+  ]
+}

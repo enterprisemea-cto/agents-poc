@@ -107,7 +107,7 @@ Compose a `## Team` section with this structure:
 ```
 ## Team
 
-Delegate work to agents. Use `/dispatch "<task>"` — it reads `.claude/team.md` and routes to the right agent.
+Delegate work to agents. Use `/agents-poc:dispatch "<task>"` — it reads `.claude/team.md` and routes to the right agent.
 
 | Role | Agent | When to use |
 |------|-------|-------------|
@@ -117,10 +117,10 @@ Delegate work to agents. Use `/dispatch "<task>"` — it reads `.claude/team.md`
 Show this proposed section to the user and ask: "Add this to CLAUDE.md? (yes/no)"
 
 On **yes**:
-1. Walk up from the project root to find the nearest `CLAUDE.md` (for mono-repo / nested-project cases, check parent directories). Check `.claude/CLAUDE.md` and then the project root `CLAUDE.md`.
+1. Search for `CLAUDE.md` within the project only: check `.claude/CLAUDE.md` first, then the project root `CLAUDE.md`. Never walk up past the project root (the directory containing `.claude/` or the repo root), and never read or modify `~/.claude/CLAUDE.md` or any path outside the project.
 2. If a `## Team` section already exists (heading through the next `##` or end of file), replace exactly that section with the new one.
 3. If no `## Team` section exists, append the new section at the end of the file.
-4. If no `CLAUDE.md` exists anywhere, create `.claude/CLAUDE.md` containing only the `## Team` section.
+4. If no `CLAUDE.md` exists within the project, create `.claude/CLAUDE.md` containing only the `## Team` section.
 5. Never modify any content outside the `## Team` section.
 
 On **no**: skip silently and proceed to handoff.
@@ -135,7 +135,7 @@ Print a summary:
 - State any roles that were skipped due to collision (if any).
 - Print this instruction verbatim:
 
-> **Run `/clear` to register the new agents, THEN `/dispatch "<task>"` to use them.**
+> **Run `/clear` to register the new agents, THEN `/agents-poc:dispatch "<task>"` to use them.**
 > The `/clear` step is REQUIRED — agent files written during a session are not in the registry until you clear and restart.
 
 ---
