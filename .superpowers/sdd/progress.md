@@ -21,3 +21,6 @@ Task 5,6 (Wave 4): complete (commit 42c8efc, README; e2e dry-run hook-fire prove
   Minor (final-review triage): README install wording vague (no real plugin-settings UI); Task(subagent_type=...) SDK vocab in quickstart before SDK explained.
   OPEN for final review: packaging — only .claude-plugin/plugin.json shipped; Claude Code may need a marketplace.json to install. Verify.
 All 4 waves implemented+reviewed. Next: final whole-branch review (opus).
+
+FINAL REVIEW (opus): NOT-READY → 2 critical + 2 important + minors. All fixed in d978016. Verified: marketplace valid, no forbidden/fabricated tokens, namespaced commands, hook intact, no bare-command leaks.
+STATUS: COMPLETE.
