@@ -12,8 +12,9 @@ Pull from all three sources before proposing anything.
 **b) Doc scan** — read up to 8 files, up to ~200 lines each, Markdown only (never sample source code):
 - `README.md`, `README*` at the project root
 - `docs/**/*.md` (up to 5 files, most recently modified first)
+- `CLAUDE.md` — explicit priority (richest context source)
 - Root-level `*.md` files (CHANGELOG, CONTRIBUTING, etc.)
-- `CLAUDE.md` at the project root or `.claude/CLAUDE.md`
+- `.claude/CLAUDE.md` (fallback if no project root CLAUDE.md exists)
 
 From each file extract: project purpose, domain, tech stack mentions, team/role language, any existing agent or automation references.
 
@@ -66,7 +67,7 @@ For each accepted role, in order:
 
 | Placeholder | Value |
 |---|---|
-| `<ROLE_NAME>` | Kebab slug (e.g. `backend-engineer`). Appears in: frontmatter `name:`, Stop-hook command (twice — directory path and echo message), memory load section (twice), memory write section (three times). Replace ALL occurrences. |
+| `<ROLE_NAME>` | Kebab slug (e.g. `backend-engineer`). Appears in: frontmatter `name:`, Stop-hook command (twice — directory path and echo message), memory load section (once), memory write section (twice). Replace ALL occurrences. |
 | `<ROLE_DESCRIPTION>` | A single sentence describing what this agent does in the context of this specific project. |
 | `<MODEL>` | `opus` for implementation, architecture, and strategy roles. `sonnet` for review, QA, copy, and triage roles. |
 | `<ROLE_BODY>` | 3–8 bullet points synthesized from the gathered context and interview answers: primary responsibilities, key constraints, tool or file scope, output format, anything domain-specific to this project. Write in imperative voice ("Implement", "Review", "Draft"). |
@@ -116,7 +117,7 @@ Delegate work to agents. Use `/dispatch "<task>"` — it reads `.claude/team.md`
 Show this proposed section to the user and ask: "Add this to CLAUDE.md? (yes/no)"
 
 On **yes**:
-1. Walk up from the project root to find the nearest `CLAUDE.md`. Check `.claude/CLAUDE.md` and then the project root `CLAUDE.md`.
+1. Walk up from the project root to find the nearest `CLAUDE.md` (for mono-repo / nested-project cases, check parent directories). Check `.claude/CLAUDE.md` and then the project root `CLAUDE.md`.
 2. If a `## Team` section already exists (heading through the next `##` or end of file), replace exactly that section with the new one.
 3. If no `## Team` section exists, append the new section at the end of the file.
 4. If no `CLAUDE.md` exists anywhere, create `.claude/CLAUDE.md` containing only the `## Team` section.
