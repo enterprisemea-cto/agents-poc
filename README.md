@@ -1,73 +1,69 @@
 # agents-poc
 
-A Claude Code plugin that teaches **per-project agents, persistent memory, and task routing** by generating the files you learn from. You install the plugin, run two commands, and inspect what was produced.
+A Claude Code plugin that teaches **per-project agents, persistent memory, and task routing** — by generating the files you learn from. Install it, run two commands, read what was produced.
 
 ---
 
 ## What this is
 
-This plugin gives Claude Code two slash commands:
+Two slash commands:
 
-- `/agents-poc:build-team` — interviews you about your project, then generates per-role agent files, a routing table (`team.md`), and a patch for `CLAUDE.md`.
-- `/agents-poc:dispatch "<task>"` — reads that routing table and delegates the task to the right agent, then chains a reviewer if one is paired.
+- `/agents-poc:build-team` — interviews you, then generates per-role agent files, a routing table (`team.md`), and a `CLAUDE.md` patch.
+- `/agents-poc:dispatch "<task>"` — reads the routing table, delegates to the best-matched agent, then chains a reviewer if one is paired.
 
-You can also invoke each skill by describing what you want in plain language — skills are description-matched, not just slash-command-matched.
+Both are description-matched, so plain-language requests trigger them too — no slash command required.
 
-The generated files are the lesson. You can read them to understand how Claude Code agents work, edit them to customise behaviour, and run the skills again to add more roles.
+The generated files are the lesson: read them to learn how agents work, edit them to change behaviour, re-run to add roles.
 
 ---
 
 ## Install
-
-Add the marketplace straight from GitHub, then install the plugin:
 
 ```
 /plugin marketplace add enterprisemea-cto/agents-poc
 /plugin install agents-poc@agents-poc
 ```
 
-- `/plugin marketplace add` takes an `<owner>/<repo>` slug or the full URL `https://github.com/enterprisemea-cto/agents-poc`.
-- The install argument is `<plugin-name>@<marketplace-name>` — both are `agents-poc` here.
-- Restart Claude Code when prompted so the plugin's skills load.
+- `marketplace add` takes an `<owner>/<repo>` slug or the full `https://github.com/enterprisemea-cto/agents-poc` URL.
+- Install argument is `<plugin>@<marketplace>` — both are `agents-poc`.
+- Restart Claude Code when prompted so the skills load.
 
-**Working on the plugin itself?** Clone it and point Claude Code at your copy:
+**Developing the plugin?** Point Claude Code at a local clone:
 
 ```
 git clone https://github.com/enterprisemea-cto/agents-poc
 claude --plugin-dir /path/to/agents-poc
 ```
 
-Or register the local path as a marketplace: `/plugin marketplace add /path/to/agents-poc`.
+Or register the path as a marketplace: `/plugin marketplace add /path/to/agents-poc`.
 
 ---
 
-## Quickstart (happy path)
+## Quickstart
 
 ```
 /agents-poc:build-team
 ```
 
-Claude interviews you, proposes a roster (2–4 roles), asks a few targeted questions, then writes:
+Claude interviews you, proposes a 2–4 role roster, asks a few targeted questions, then writes:
 
-- `.claude/agents/<role>.md` — one file per role
+- `.claude/agents/<role>.md` — one per role
 - `.claude/team.md` — routing table and review pairings
-- A `## Team` section added to your `CLAUDE.md` after you confirm
+- a `## Team` section in `CLAUDE.md` (after you confirm)
 
-**Then run `/clear`.**
-
-> `/clear` is required. Agent files written during a session are not registered in Claude Code's agent registry until you clear and restart. Skipping this step means `/agents-poc:dispatch` will fail with "agent not found".
+**Then run `/clear`** — required. Agent files written mid-session aren't registered until you clear and restart; skip it and `dispatch` fails with "agent not found".
 
 ```
 /agents-poc:dispatch "implement the widget creation endpoint"
 ```
 
-`/agents-poc:dispatch` reads `team.md`, scores the task against the routing notes, picks the best-matched role, delegates via `Task(subagent_type=...)` (Claude Code's Agent/Task mechanism — dispatch hands the work to the named agent as a sub-task), and — if a reviewer is paired — chains that reviewer automatically once the implementation completes.
+`dispatch` reads `team.md`, scores the task against the routing notes, picks the best role, delegates via `Task(subagent_type=...)` (Claude Code's sub-task mechanism), and chains the paired reviewer once the implementation completes.
 
 ---
 
 ## Anatomy of a generated agent
 
-Below is the real `builder` agent generated for a sample Widget API project. Every line is production output from the template-fill step.
+The real `builder` agent from a sample Widget API project — production output from the template-fill step:
 
 ```markdown
 ---
@@ -122,14 +118,14 @@ every future run.
 command: "bash -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/agent-memory/builder/MEMORY.md\"; grep -q \"^$(date +%F):\" \"$f\" 2>/dev/null || { echo \"...\"; exit 2; }'"
 ```
 
-- **`$CLAUDE_PROJECT_DIR`** — Claude Code sets this to the project root at runtime. The hook uses it to find the memory file regardless of what directory the agent is working in.
-- **`grep -q "^$(date +%F):"`** — checks whether `MEMORY.md` already has an entry dated today (`date +%F` = `YYYY-MM-DD`, matching the entry format). If today's line is missing, the hook fires. Writing any dated line — including the explicit `No new learnings this session.` line — satisfies it.
-- **`exit 2`** — exit code 2 signals Claude Code to block the session from ending and surface the message to the agent. The agent sees the stderr message and knows to write the memory entry.
-- **Backstop, not a wall** — the check is self-satisfiable: the model writes one line dated today and the next check passes (exit 0), so normal flow ends in one retry. The nudge is **per-day** — it catches the first un-recorded run each day, not every session within a day. That ceiling is deliberate; true per-session enforcement would need a `SubagentStart` snapshot (see the design spec).
+- **`$CLAUDE_PROJECT_DIR`** — set to the project root at runtime; locates the memory file regardless of the agent's working directory.
+- **`grep -q "^$(date +%F):"`** — checks whether `MEMORY.md` has a line dated today (`date +%F` = `YYYY-MM-DD`). Missing → the hook fires. Any dated line satisfies it, including the `No new learnings this session.` line.
+- **`exit 2`** — signals Claude Code to block session end and surface the stderr message to the agent.
+- **Backstop, not a wall** — self-satisfiable: one dated line and the next check passes (exit 0), so flow ends in one retry. The nudge is **per-day** — it catches the first un-recorded run each day, not every session. That ceiling is deliberate; true per-session enforcement would need a `SubagentStart` snapshot (see the design spec).
 
 ### `## On start — load memory`
 
-Instructs the agent to read its own `MEMORY.md` at the top of every session before doing any work. This is a plain prose instruction — there is no hook enforcing it. The discipline lives in the agent definition, not the shell.
+Prose instruction to read `MEMORY.md` before any work. No hook enforces it — the discipline lives in the agent definition, not the shell.
 
 ### `## Before finishing — write memory`
 
@@ -141,35 +137,27 @@ YYYY-MM-DD: <transferable rule, ≤15 words>.
   Apply: <when this rule fires, ≤15 words>.
 ```
 
-- **`YYYY-MM-DD:`** — datestamp so entries age visibly. Old entries can be merged or dropped.
-- **`Why:`** — the mechanism, not the symptom. Forces the agent to understand, not just record.
-- **`Apply:`** — the trigger condition. Without it, a rule is unactionable.
+- **`YYYY-MM-DD:`** — datestamp so entries age visibly and can be merged or dropped.
+- **`Why:`** — the mechanism, not the symptom. Forces understanding, not just recording.
+- **`Apply:`** — the trigger condition. Without it a rule is unactionable.
 
 ---
 
 ## Memory
 
-Memory files live at:
+Files live at `.claude/agent-memory/<role>/MEMORY.md` — one per agent. Never written by `build-team`; only the agent itself writes it, after real sessions produce real learnings.
 
-```
-.claude/agent-memory/<role>/MEMORY.md
-```
+**Discipline:**
 
-Each agent owns its own file. The file is never written by `/agents-poc:build-team` — only the agent itself writes it, after real sessions produce real learnings.
-
-**Discipline rules:**
-
-- **Transferable only.** Record patterns that apply across future sessions. Skip task IDs, ticket numbers, file:line citations, and anything derivable from the project docs.
-- **Update, don't duplicate.** Before appending, read the existing file. If a similar entry exists, update it in place.
-- **No-new-learnings line.** If nothing was learned, write `YYYY-MM-DD: No new learnings this session.` This satisfies the hook and keeps the file honest.
-- **Size ceiling.** Past ~40 entries, merge duplicates before adding more. Bloated memory costs tokens on every future run.
+- **Transferable only.** Skip task IDs, ticket numbers, file:line citations, and anything derivable from the project docs.
+- **Update, don't duplicate.** Read the file first; update a similar entry in place.
+- **No-new-learnings line.** Nothing learned? Write `YYYY-MM-DD: No new learnings this session.` — satisfies the hook, keeps the file honest.
+- **Size ceiling.** Past ~40 entries, merge duplicates before adding more.
 
 ---
 
 ## Make your own
 
-**Edit a generated agent** — open `.claude/agents/<role>.md` and change the `## Role` section, the model (`opus`/`sonnet`), or the hook message. Changes take effect after `/clear`.
-
-**Hand-write an agent** — create `.claude/agents/my-role.md` with the same frontmatter structure. The minimum viable file is a `name:`, `model:`, and a `## Role` block.
-
-**Add more roles** — run `/agents-poc:build-team` again. It detects existing agent files and asks before overwriting (`overwrite / version-suffix / skip`).
+- **Edit an agent** — change the `## Role`, the model (`opus`/`sonnet`), or the hook message in `.claude/agents/<role>.md`. Takes effect after `/clear`.
+- **Hand-write one** — create `.claude/agents/my-role.md` with the same frontmatter. Minimum viable: `name:`, `model:`, and a `## Role` block.
+- **Add roles** — re-run `/agents-poc:build-team`. It detects existing files and asks before overwriting (`overwrite / version-suffix / skip`).
