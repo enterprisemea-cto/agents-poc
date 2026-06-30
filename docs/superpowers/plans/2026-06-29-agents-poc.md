@@ -14,7 +14,7 @@
 - **No machine-specific paths and no `${CLAUDE_PLUGIN_ROOT}`** in any generated/project file — the memory hook is inlined against `$CLAUDE_PROJECT_DIR`.
 - **No author-plugin dependencies** — no `caveman:compress` (or any `caveman`/`ponytail`/`context-mode`) calls in shipped or generated files.
 - **No `permissionMode: bypassPermissions`** in templates or generated agents.
-- **Memory = nudge, not enforcement** — copy says "nudge"; the 8-block cap (`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`) is acknowledged. Never "blocks until written."
+- **Memory = nudge, not enforcement** — copy says "nudge"; Claude Code's `stop_hook_active` loop protection prevents an infinite block. Never "blocks until written."
 - **Memory entry shape** verbatim: 3 lines — `YYYY-MM-DD: <rule ≤15w>.` / `  Why: <≤20w>.` / `  Apply: <≤15w>.`
 - Spec of record: `docs/specs/2026-06-29-agents-poc-design.md`.
 
@@ -306,7 +306,7 @@ git add skills/dispatch/SKILL.md && git commit -m "feat: dispatch skill with rev
   1. **What this is** — per-project agents + memory + routing, learn by reading the files.
   2. **Install** — how to add the plugin to Claude Code.
   3. **Quickstart (happy path)** — `/build-team` → **`/clear` (required, explain why)** → `/dispatch "<task>"`.
-  4. **Anatomy of a generated agent** — paste a REAL example generated agent file (run build-team mentally or use the Task 6 output) and annotate, line by line: the inline Stop hook (what `$CLAUDE_PROJECT_DIR`, `test -s`, `exit 2` do; that it's a nudge with an 8-block cap), the on-start memory-load, the before-finish memory-write block + the 3-line entry shape.
+  4. **Anatomy of a generated agent** — paste a REAL example generated agent file (run build-team mentally or use the Task 6 output) and annotate, line by line: the inline Stop hook (what `$CLAUDE_PROJECT_DIR`, `test -s`, `exit 2` do; that it's a nudge, not a hard wall — loop protection via `stop_hook_active`), the on-start memory-load, the before-finish memory-write block + the 3-line entry shape.
   5. **Memory** — where it lives (`.claude/agent-memory/<role>/MEMORY.md`), the discipline rules.
   6. **Make your own** — edit a generated agent or hand-write one; run again to add roles.
 

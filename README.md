@@ -19,21 +19,25 @@ The generated files are the lesson. You can read them to understand how Claude C
 
 ## Install
 
-1. Clone or copy this repository to your machine.
-2. Add the marketplace (local path):
-   ```
-   /plugin marketplace add /path/to/agents-poc
-   ```
-   Or by git URL:
-   ```
-   /plugin marketplace add https://github.com/you/agents-poc
-   ```
-3. Install the plugin:
-   ```
-   /plugin install agents-poc@agents-poc
-   ```
-   Format: `<plugin-name>@<marketplace-name>`.
-4. For local development you can also launch directly: `claude --plugin-dir /path/to/agents-poc`.
+Add the marketplace straight from GitHub, then install the plugin:
+
+```
+/plugin marketplace add enterprisemea-cto/agents-poc
+/plugin install agents-poc@agents-poc
+```
+
+- `/plugin marketplace add` takes an `<owner>/<repo>` slug or the full URL `https://github.com/enterprisemea-cto/agents-poc`.
+- The install argument is `<plugin-name>@<marketplace-name>` — both are `agents-poc` here.
+- Restart Claude Code when prompted so the plugin's skills load.
+
+**Working on the plugin itself?** Clone it and point Claude Code at your copy:
+
+```
+git clone https://github.com/enterprisemea-cto/agents-poc
+claude --plugin-dir /path/to/agents-poc
+```
+
+Or register the local path as a marketplace: `/plugin marketplace add /path/to/agents-poc`.
 
 ---
 

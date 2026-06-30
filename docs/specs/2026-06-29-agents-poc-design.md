@@ -140,9 +140,9 @@ hooks:
 - A `Stop` matcher in a custom subagent's frontmatter is auto-converted to
   `SubagentStop` at runtime — generated project agents are "custom" subagents
   and ARE allowed hooks (the plugin-subagent restriction does not apply here).
-- **Nudge, not enforcement.** Claude Code overrides a blocking Stop hook after
-  8 consecutive blocks (`CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`). Describe this as a
-  strong nudge with an 8-try ceiling — NOT "blocks until written."
+- **Nudge, not enforcement.** Claude Code sets `stop_hook_active` when a stop
+  hook is already running, which prevents an infinite block loop. Describe this
+  as a strong nudge — NOT "blocks until written."
 - **First-run safety.** Writing the `YYYY-MM-DD: No new learnings.` line
   satisfies the `test -s` check (file becomes non-empty), so a brand-new agent
   with nothing to record can finish. The memory-write block must instruct the
