@@ -1,6 +1,6 @@
 # Team — <PROJECT_NAME>
 
-Built by /build-team on <BUILD_DATE>. Source: <SOURCE_LINE>.
+Built by `/agents-poc:build-team` on <BUILD_DATE>. Source: <SOURCE_LINE>.
 
 ## Roster
 

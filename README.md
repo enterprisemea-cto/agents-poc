@@ -155,7 +155,7 @@ Memory files live at:
 .claude/agent-memory/<role>/MEMORY.md
 ```
 
-Each agent owns its own file. The file is never written by `/build-team` — only the agent itself writes it, after real sessions produce real learnings.
+Each agent owns its own file. The file is never written by `/agents-poc:build-team` — only the agent itself writes it, after real sessions produce real learnings.
 
 **Discipline rules:**
 
