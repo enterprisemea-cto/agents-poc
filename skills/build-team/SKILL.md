@@ -91,7 +91,7 @@ Read `skills/build-team/team-template.md` (the sibling file in this skill direct
 | `<BUILD_DATE>` | Today's date in `YYYY-MM-DD` format. |
 | `<SOURCE_LINE>` | Concise description of what was used, e.g. `"conversation + README.md + docs/architecture.md"`. |
 | `<ROSTER_ROWS>` | One Markdown table row per role: `\| Role display name \| agent-name \| One sentence on when to use this agent \|`. |
-| `<PRIORITY_ORDER>` | Numbered list of agent names in the order the roles were accepted (first = highest priority). The `/dispatch` skill uses this list to break ties when a task matches multiple roles. |
+| `<PRIORITY_ORDER>` | Numbered list of agent names in the order the roles were accepted (first = highest priority). The `/agents-poc:dispatch` skill uses this list to break ties when a task matches multiple roles. |
 | `<ROUTING_NOTES>` | Bullet list mapping work types to roles. Use concrete language: verbs (implement, review, write, triage), doc or file types (API spec, test file, changelog), and domain topics (authentication, billing, UI). Example: `- API endpoint changes → backend-engineer`. |
 | `<REVIEW_PAIRINGS>` | For each implementer role, name its reviewer. Convention: the first/primary role listed reviews the work of the others. If only one role exists in the project, write: `No pairings (single role)`. |
 

@@ -78,7 +78,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: "bash -c 'test -s \"$CLAUDE_PROJECT_DIR/.claude/agent-memory/builder/MEMORY.md\" || { echo \"Write a line to .claude/agent-memory/builder/MEMORY.md before finishing (use the No-new-learnings line if nothing to record).\" >&2; exit 2; }'"
+          command: "bash -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/agent-memory/builder/MEMORY.md\"; grep -q \"^$(date +%F):\" \"$f\" 2>/dev/null || { echo \"Record this session before finishing: add a line dated $(date +%F) to .claude/agent-memory/builder/MEMORY.md (use the No-new-learnings line if nothing to record).\" >&2; exit 2; }'"
 ---
 
 ## On start — load memory
@@ -92,9 +92,12 @@ You implement features for the Widget API. Write the minimal code that satisfies
 
 ## Before finishing — write memory
 
-A Stop hook nudges you to record learnings before you finish (it can block up
-to a few times, then lets you through — it is a nudge, not a wall). Keep
-`MEMORY.md` lean; bloated memory costs tokens on every future run.
+A Stop hook blocks you from finishing until
+`.claude/agent-memory/builder/MEMORY.md` has an entry dated today. Write one —
+a real learning or the No-new-learnings line — and the check passes (the model
+can always satisfy it in one step, so it self-terminates; it is a backstop, not
+an unbreakable wall). Keep `MEMORY.md` lean; bloated memory costs tokens on
+every future run.
 
 1. `mkdir -p .claude/agent-memory/builder`
 2. Read existing `.claude/agent-memory/builder/MEMORY.md` first. If a similar
@@ -116,13 +119,13 @@ to a few times, then lets you through — it is a nudge, not a wall). Keep
 ### The inline Stop hook
 
 ```yaml
-command: "bash -c 'test -s \"$CLAUDE_PROJECT_DIR/.claude/agent-memory/builder/MEMORY.md\" || { echo \"...\"; exit 2; }'"
+command: "bash -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/agent-memory/builder/MEMORY.md\"; grep -q \"^$(date +%F):\" \"$f\" 2>/dev/null || { echo \"...\"; exit 2; }'"
 ```
 
 - **`$CLAUDE_PROJECT_DIR`** — Claude Code sets this to the project root at runtime. The hook uses it to find the memory file regardless of what directory the agent is working in.
-- **`test -s`** — tests that the file exists AND is non-empty (`-s` = size > 0). An empty file still fails the test, so the agent cannot satisfy the hook by writing a blank file.
+- **`grep -q "^$(date +%F):"`** — checks whether `MEMORY.md` already has an entry dated today (`date +%F` = `YYYY-MM-DD`, matching the entry format). If today's line is missing, the hook fires. Writing any dated line — including the explicit `No new learnings this session.` line — satisfies it.
 - **`exit 2`** — exit code 2 signals Claude Code to block the session from ending and surface the message to the agent. The agent sees the stderr message and knows to write the memory entry.
-- **Nudge, not a wall** — Claude Code's stop-hook loop protection (the `stop_hook_active` flag is set when a stop hook is already in progress) prevents an infinite block. The hook is a strong nudge, not an unbreakable wall.
+- **Backstop, not a wall** — the check is self-satisfiable: the model writes one line dated today and the next check passes (exit 0), so normal flow ends in one retry. The nudge is **per-day** — it catches the first un-recorded run each day, not every session within a day. That ceiling is deliberate; true per-session enforcement would need a `SubagentStart` snapshot (see the design spec).
 
 ### `## On start — load memory`
 

@@ -38,7 +38,7 @@ Look up `<agent-name>` from the `Agent` column in `## Roster` for the matched ro
 
 The subagent has no conversation history. Include in the prompt: the complete task, any file paths or constraints already known, and any decisions made in this conversation that affect the work.
 
-If the Task call fails with "agent not found": tell the user "This agent was created this session and isn't registered yet — run `/clear` once, then re-run `/dispatch`." Do not retry automatically.
+If the Task call fails with "agent not found": tell the user "This agent was created this session and isn't registered yet — run `/clear` once, then re-run `/agents-poc:dispatch`." Do not retry automatically.
 
 ## 4. Chain reviewer
 

@@ -10,7 +10,7 @@ Built by /build-team on <BUILD_DATE>. Source: <SOURCE_LINE>.
 
 ## Priority order
 
-Highest-priority role first. `/dispatch` uses this to break ties.
+Highest-priority role first. `/agents-poc:dispatch` uses this to break ties.
 
 <PRIORITY_ORDER>
 
@@ -20,6 +20,6 @@ Highest-priority role first. `/dispatch` uses this to break ties.
 
 ## Review pairings
 
-After an implementer finishes, /dispatch chains its reviewer:
+After an implementer finishes, `/agents-poc:dispatch` chains its reviewer:
 
 <REVIEW_PAIRINGS>

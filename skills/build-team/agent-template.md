@@ -6,7 +6,7 @@ hooks:
   Stop:
     - hooks:
         - type: command
-          command: "bash -c 'test -s \"$CLAUDE_PROJECT_DIR/.claude/agent-memory/<ROLE_NAME>/MEMORY.md\" || { echo \"Write a line to .claude/agent-memory/<ROLE_NAME>/MEMORY.md before finishing (use the No-new-learnings line if nothing to record).\" >&2; exit 2; }'"
+          command: "bash -c 'f=\"$CLAUDE_PROJECT_DIR/.claude/agent-memory/<ROLE_NAME>/MEMORY.md\"; grep -q \"^$(date +%F):\" \"$f\" 2>/dev/null || { echo \"Record this session before finishing: add a line dated $(date +%F) to .claude/agent-memory/<ROLE_NAME>/MEMORY.md (use the No-new-learnings line if nothing to record).\" >&2; exit 2; }'"
 ---
 
 ## On start — load memory
@@ -20,9 +20,17 @@ exists. It holds transferable learnings from past sessions. Apply them.
 
 ## Before finishing — write memory
 
-A Stop hook nudges you to record learnings before you finish (it can block up
-to a few times, then lets you through — it is a nudge, not a wall). Keep
-`MEMORY.md` lean; bloated memory costs tokens on every future run.
+<!-- ponytail: the Stop hook checks for an entry dated today (per-day granularity).
+     It catches the first un-recorded run each day, not every session. True
+     per-session enforcement would need a SubagentStart snapshot + marker file —
+     not worth it for this POC. Upgrade path is in the design spec. -->
+
+A Stop hook blocks you from finishing until
+`.claude/agent-memory/<ROLE_NAME>/MEMORY.md` has an entry dated today. Write one
+— a real learning or the No-new-learnings line — and the check passes (the model
+can always satisfy it in one step, so it self-terminates; it is a backstop, not
+an unbreakable wall). Keep `MEMORY.md` lean; bloated memory costs tokens on
+every future run.
 
 1. `mkdir -p .claude/agent-memory/<ROLE_NAME>`
 2. Read existing `.claude/agent-memory/<ROLE_NAME>/MEMORY.md` first. If a similar
