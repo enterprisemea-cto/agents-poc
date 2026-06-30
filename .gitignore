@@ -1,2 +1,9 @@
 .DS_Store
 scratch/
+
+# build-team dogfooding artifacts — local working team, regenerate with /agents-poc:build-team.
+# NOT the shipped plugin (that's .claude-plugin/ + skills/). Memory is per-machine and must stay local.
+.claude/agents/
+.claude/agent-memory/
+.claude/team.md
+.claude/CLAUDE.md
