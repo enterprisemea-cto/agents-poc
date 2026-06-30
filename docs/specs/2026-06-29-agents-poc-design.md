@@ -59,7 +59,7 @@ Merges `staff` + `persona`, stripped to standalone + doc-driven. Flow:
 **2. Propose roster.** Synthesize all three sources → draft 2–4 roles with a
 one-line why-needed each. Nudge toward **≥2 roles** so dispatch has something
 to route between and chain. Present roster; accept `accept` / `add` /
-`remove` / `swap` / natural-language changes. Loop until accepted.
+`remove` / natural-language changes. Loop until accepted.
 
 **3. Interview gaps only.** Scan + convo do the heavy lifting; ask 0–4
 follow-ups one at a time only to fill what's missing (project stage, role

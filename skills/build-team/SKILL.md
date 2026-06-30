@@ -38,7 +38,6 @@ Present the full roster. Accept and act on these edits (loop until the user type
 - `accept` — proceed to step 3
 - `add <role>` — append a new role with a one-line rationale you draft
 - `remove <role>` — drop it and re-number
-- `swap <old> for <new>` — replace, preserving position
 - Natural-language edits (e.g. "split backend into API and worker") — interpret and show the updated roster
 
 Do not proceed past this step until the user explicitly accepts.
